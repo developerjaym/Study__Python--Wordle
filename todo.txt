@@ -1,0 +1,8 @@
+3. Error handling
+    -User doesn't exist?
+    -Test mroe
+4. A word like JELLY and a guess like LLAMA should have two yellow L characters
+8. I don't like my validation stuff
+    -The input service methods should accept 'validator' arguments
+9. Add real days to the application
+    -Perhaps save them in a database    
