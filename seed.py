@@ -1,5 +1,7 @@
 from datetime import datetime, timedelta
+
 from models import WordleDay
+
 
 def seeder(session):
     words = ['JOUST', 'ABOUT', 'CRANE', 'FRANK', 'IDEAL', 'EPOXY']

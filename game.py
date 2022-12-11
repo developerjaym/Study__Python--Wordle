@@ -1,5 +1,5 @@
 from input_stuff import PasswordValidator, NameValidator, GuessValidator, InputService, Prompter
-from models import Player, WordleDay, Result
+from models import WordleDay, Result
 from wordlist import WordList
 from datetime import datetime
 from login import LoginService, PlayerRepository
@@ -22,8 +22,8 @@ class Application:
         
     def start(self):
         active_player = self.login_service.get_user()
-        analysis = self.game.start()
-        result = Result(score = 1 if analysis["won"] else 0, player = active_player, wordle_day = self.wordle_day)
+        state = self.game.start()
+        result = Result(score = 1 if state["won"] else 0, player = active_player, wordle_day = self.wordle_day)
         self.session.add(result)
         self.session.commit()
         
@@ -39,14 +39,14 @@ class Game:
         self._prompter = prompter
         self._state = {
             "round": 0,
-            "guesses": [],
+            "guesses": set(),
             "over": False
         }
     def start(self):
         while self._state["round"] < 6 and not self._state["over"]:
             self._prompter.show_message(f"Round {(self._state['round'] + 1)}")
             guess = self._input_service.get_word(invalid=self._state["guesses"]).strip().upper()
-            self._state["guesses"].append(guess)
+            self._state["guesses"].add(guess)
             self._state["round"] = self._state["round"] + 1
             analysis = self._analyze_guess(guess)
             self._state["over"] = len([val for val in analysis.values() if val[0] == LetterResult.PERFECT]) == 5

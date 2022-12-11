@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
 
 
-from sqlalchemy import (
-                        create_engine)
+from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from game import Application
-from seed import seeder
 from models import Base
+from seed import seeder
 
 if __name__ == "__main__":
     engine = create_engine('sqlite:///:memory:')

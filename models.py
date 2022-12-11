@@ -1,10 +1,10 @@
 from datetime import datetime
 
-from sqlalchemy import (ForeignKey, create_engine, desc, func,
-    CheckConstraint, PrimaryKeyConstraint, UniqueConstraint,
-    Index, Column, DateTime, Integer, String)
+from sqlalchemy import (Column, DateTime, ForeignKey, Index,
+                        Integer, PrimaryKeyConstraint, String,
+                        UniqueConstraint, func)
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, relationship, backref
+from sqlalchemy.orm import backref, relationship, sessionmaker
 
 Base = declarative_base()
 

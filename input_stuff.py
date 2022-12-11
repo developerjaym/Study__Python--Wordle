@@ -1,7 +1,6 @@
 import click
 import codecs
 from models import Player
-from sqlalchemy import select
 
 
 class GuessValidator:
@@ -11,13 +10,14 @@ class GuessValidator:
         return len(str) == 5
     def _is_word(self, str):
         return self._word_list.is_word(str)    
-    def validation_results(self, str, invalid=[]):
+    def validation_results(self, str, invalid):
         results = {}
         if not self._is_long_enough(str):
             results["length"] = f"'{str}' is too short. Must be 5 characters."
         if not self._is_word(str):
             results["valid"] = f"'{str}' is not in my dictionary."  
-        if [word for word in invalid if word.upper() == str.upper()]:
+        print('testing', str, len([word for word in invalid if word.upper() == str.upper()]) > 0, invalid)    
+        if len([word for word in invalid if word.upper() == str.upper()]) > 0:
             results["played"] = f"'{str}' has already been played."      
         return results         
 
@@ -93,12 +93,12 @@ class InputService:
             return self.get_password(confirmation_prompt)
         # return codecs.encode(response, 'rot13')        
         return response
-    def get_word(self, invalid=[]):
-        response = self._prompter.get_string("Your guess")
+    def get_word(self, invalid):
+        response = self._prompter.get_string("Your guess").upper().strip()
         validation_results = self._guess_validator.validation_results(response, invalid)
         if len(validation_results):
             for result in validation_results.values():
                 self._prompter.show_error(result)
-            return self.get_word()    
+            return self.get_word(invalid)    
         return response    
 
