@@ -1,5 +1,4 @@
 import click
-import codecs
 from models import Player
 
 
@@ -16,7 +15,6 @@ class GuessValidator:
             results["length"] = f"'{str}' is too short. Must be 5 characters."
         if not self._is_word(str):
             results["valid"] = f"'{str}' is not in my dictionary."  
-        print('testing', str, len([word for word in invalid if word.upper() == str.upper()]) > 0, invalid)    
         if len([word for word in invalid if word.upper() == str.upper()]) > 0:
             results["played"] = f"'{str}' has already been played."      
         return results         
@@ -72,6 +70,8 @@ class InputService:
         self._password_validator = password_validator
         self._guess_validator = guess_validator
         self._prompter = prompter
+    def wants_to_continue(self):
+        return self._prompter.get_yes_no("Do you want to play again?")    
     def has_account(self):
         return self._prompter.get_yes_no("Do you have an account?")
     def get_name(self, validate=True):
@@ -89,9 +89,7 @@ class InputService:
         if len(validation_results):
             for result in validation_results.values():
                 self._prompter.show_error(result)
-            # return codecs.encode(self.get_password(), 'rot13')
             return self.get_password(confirmation_prompt)
-        # return codecs.encode(response, 'rot13')        
         return response
     def get_word(self, invalid):
         response = self._prompter.get_string("Your guess").upper().strip()

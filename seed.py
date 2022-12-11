@@ -4,7 +4,7 @@ from models import WordleDay
 
 
 def seeder(session):
-    words = ['JOUST', 'ABOUT', 'CRANE', 'FRANK', 'IDEAL', 'EPOXY']
+    words = ['JOUST', 'ABOUT', 'CRANE', 'FRANK', 'IDEAL', 'EPOCH']
     today = datetime.today()
     numdays = len(words)
     date_list = [today + timedelta(days=x) for x in range(numdays)]

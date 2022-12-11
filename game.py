@@ -2,7 +2,7 @@ from input_stuff import PasswordValidator, NameValidator, GuessValidator, InputS
 from models import WordleDay, Result
 from wordlist import WordList
 from datetime import datetime
-from login import LoginService, PlayerRepository
+from login import LoginService, PlayerRepository, encode_password
 from enum import Enum
 
 class Application:
@@ -13,11 +13,11 @@ class Application:
         word_list = WordList()
         guess_validator = GuessValidator(word_list)
         prompter = Prompter()
-        input_service = InputService(name_validator, password_validator, guess_validator, prompter)
+        self.input_service = InputService(name_validator, password_validator, guess_validator, prompter)
         self.wordle_day = session.query(WordleDay).filter(WordleDay.date == datetime.today().date()).one()
-        self.game = Game(input_service, self.wordle_day, prompter)
-        player_repository = PlayerRepository(session)
-        self.login_service = LoginService(prompter, input_service, player_repository)
+        self.game = Game(self.input_service, self.wordle_day, prompter)
+        player_repository = PlayerRepository(session, encode_password)
+        self.login_service = LoginService(prompter, self.input_service, player_repository)
 
         
     def start(self):
@@ -26,6 +26,8 @@ class Application:
         result = Result(score = 1 if state["won"] else 0, player = active_player, wordle_day = self.wordle_day)
         self.session.add(result)
         self.session.commit()
+        if self.input_service.wants_to_continue():
+            self.start()  
         
 class LetterResult(Enum):
     PERFECT = "green"
@@ -37,12 +39,12 @@ class Game:
         self._input_service = input_service
         self._wordle_day = wordle_day
         self._prompter = prompter
+    def start(self):
         self._state = {
             "round": 0,
             "guesses": set(),
             "over": False
         }
-    def start(self):
         while self._state["round"] < 6 and not self._state["over"]:
             self._prompter.show_message(f"Round {(self._state['round'] + 1)}")
             guess = self._input_service.get_word(invalid=self._state["guesses"]).strip().upper()

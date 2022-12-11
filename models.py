@@ -1,10 +1,9 @@
 from datetime import datetime
 
-from sqlalchemy import (Column, DateTime, ForeignKey, Index,
-                        Integer, PrimaryKeyConstraint, String,
-                        UniqueConstraint, func)
+from sqlalchemy import (Column, DateTime, ForeignKey, Index, Integer,
+                        PrimaryKeyConstraint, String, UniqueConstraint, func)
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import backref, relationship, sessionmaker
+from sqlalchemy.orm import backref, relationship
 
 Base = declarative_base()
 
@@ -17,17 +16,12 @@ class Player(Base):
             UniqueConstraint(
                 'name',
                 name='unique_name'),
-            # CheckConstraint(
-                # 'age BETWEEN 18 AND 126',
-                # name='age_between_18_and_126')
         )
 
     Index('index_name', 'name')
 
     id = Column(Integer())
     name = Column(String())
-    # email = Column(String(55))
-    # age = Column(Integer())
     password = Column(String())
     sign_up_date = Column(DateTime(), default=datetime.now())
     results = relationship('Result', backref=backref('player'))

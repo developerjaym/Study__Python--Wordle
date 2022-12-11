@@ -6,4 +6,3 @@
     -Perhaps save them in a database  
 10. My word list is lacking
     -jumpy? epoxy? So many common words are missing      
-11. encode passwords    

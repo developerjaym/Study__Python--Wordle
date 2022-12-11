@@ -1,10 +1,18 @@
 from models import Player
+import codecs
+
+def encode_password(password):
+    return codecs.encode(password, 'rot13')
+
 class PlayerRepository:
-    def __init__(self, session):
+    def __init__(self, session, password_encoder):
         self._session = session
+        self._password_encoder = password_encoder
     def get_player(self, name, password):
+        password = self._password_encoder(password)
         return self._session.query(Player).filter(Player.name==name, Player.password == password).one_or_none()
     def save(self, player):
+        player.password = self._password_encoder(player.password)
         self._session.add(player)
         self._session.commit()
 
@@ -31,6 +39,4 @@ class LoginService:
                 self._prompter.show_error(f"No record of that username and password combination in our database.")
                 return self.get_user()
             return player    
-            #TODO worry about password encoding
-            #TODO worry about error handling
 
