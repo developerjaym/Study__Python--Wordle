@@ -22,8 +22,8 @@ class Game:
             self._state["guesses"].add(guess)
             self._state["round"] = self._state["round"] + 1
             analysis = self._analyze_guess(guess)
-            self._state["over"] = len([val for val in analysis.values() if val[0] == LetterResult.PERFECT]) == 5
-            self._prompter.show_colored_message([(val[0].value, val[1]) for val in analysis.values()])
+            self._state["over"] = len([val for val in analysis if val[0] == LetterResult.PERFECT]) == 5
+            self._prompter.show_colored_message([(val[0].value, val[1]) for val in analysis])
             if self._state["over"]:
                 self._state["won"] = True
                 self._prompter.show_colored_message([("green", "W"), ("green", "I"), ("green", "N"), ("green", "N"), ("green", "E"), ("green", "R"),("green", "!")])
@@ -34,32 +34,22 @@ class Game:
        
   
     def _analyze_guess(self, guess):
-        analysis = {}
-        right_word = self._wordle_day.word
-        adjusted_word = right_word
-        #find perfect matches
+        right_letters = list(self._wordle_day.word)
+
+        analysis_list = [(LetterResult.TOTALLY_WRONG, guessed_letter) for guessed_letter in guess] 
+        #round 1, find perfect matches
         for letter_index in range(5):
             guessed_letter = guess[letter_index]
-            if guessed_letter == adjusted_word[letter_index]:
-                analysis[f"{letter_index}"] = (LetterResult.PERFECT, guessed_letter)   
-                adjusted_word = list(adjusted_word)
-                adjusted_word[letter_index] = '_'  
-                adjusted_word = ''.join(adjusted_word)        
+            if guessed_letter == right_letters[letter_index]:
+                analysis_list[letter_index] = (LetterResult.PERFECT, guessed_letter)
+                right_letters[letter_index] = '_'
 
         #round 2, find wrong place matches        
         for letter_index in range(5):
             guessed_letter = guess[letter_index]
-            if f"{letter_index}" not in analysis and guessed_letter in adjusted_word:
-                analysis[f"{letter_index}"] = (LetterResult.WRONG_PLACE, guessed_letter)
-                adjusted_word.replace(guessed_letter, '_', 1)  
+            if analysis_list[letter_index][0] == LetterResult.TOTALLY_WRONG and guessed_letter in right_letters:
+                analysis_list[letter_index] = (LetterResult.WRONG_PLACE, guessed_letter)
+                right_letters.remove(guessed_letter)
 
-        #round 3, set the remainder 
-        for letter_index in range(5):
-            guessed_letter = guess[letter_index]
-            if f"{letter_index}" not in analysis:
-                analysis[f"{letter_index}"] = (LetterResult.TOTALLY_WRONG, guessed_letter)
+        return analysis_list
 
-        ordered_analysis = {}
-        for key in range(5):
-            ordered_analysis[f"{key}"] = analysis[f"{key}"]
-        return ordered_analysis
