@@ -11,12 +11,14 @@ class GuessValidator:
         return len(str) == 5
     def _is_word(self, str):
         return self._word_list.is_word(str)    
-    def validation_results(self, str):
+    def validation_results(self, str, invalid=[]):
         results = {}
         if not self._is_long_enough(str):
             results["length"] = f"'{str}' is too short. Must be 5 characters."
         if not self._is_word(str):
-            results["valid"] = f"'{str}' is not in my dictionary."    
+            results["valid"] = f"'{str}' is not in my dictionary."  
+        if [word for word in invalid if word.upper() == str.upper()]:
+            results["played"] = f"'{str}' has already been played."      
         return results         
 
 class PasswordValidator:
@@ -59,10 +61,10 @@ class Prompter:
         click.secho(message, bold=True, fg=self._sad_fg, bg=self._normal_bg)
     def show_message(self, message):
         click.secho(message, bold=False, fg=self._normal_fg, bg=self._normal_bg)
-    def show_colored_message(self, color_letter_map):
+    def show_colored_message(self, color_letter_tuples):
         message = ""
-        for val in color_letter_map.values():
-            message = f"{message}{click.style(val[1], bg=val[0].value, fg=self._normal_bg, bold=True)}"
+        for val in color_letter_tuples:
+            message = f"{message}{click.style(val[1], bg=val[0], fg=self._normal_bg, bold=True)}"
         click.secho(message)
 class InputService:
     def __init__(self, name_validator, password_validator, guess_validator, prompter):
@@ -91,9 +93,9 @@ class InputService:
             return self.get_password(confirmation_prompt)
         # return codecs.encode(response, 'rot13')        
         return response
-    def get_word(self):
+    def get_word(self, invalid=[]):
         response = self._prompter.get_string("Your guess")
-        validation_results = self._guess_validator.validation_results(response)
+        validation_results = self._guess_validator.validation_results(response, invalid)
         if len(validation_results):
             for result in validation_results.values():
                 self._prompter.show_error(result)

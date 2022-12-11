@@ -7,6 +7,7 @@ from enum import Enum
 
 class Application:
     def __init__(self, session):
+        self.session = session
         password_validator = PasswordValidator()
         name_validator = NameValidator(session)
         word_list = WordList()
@@ -23,8 +24,8 @@ class Application:
         active_player = self.login_service.get_user()
         analysis = self.game.start()
         result = Result(score = 1 if analysis["won"] else 0, player = active_player, wordle_day = self.wordle_day)
-        print("eventually save this", result)
-        #TODO save result for active_player
+        self.session.add(result)
+        self.session.commit()
         
 class LetterResult(Enum):
     PERFECT = "green"
@@ -43,34 +44,49 @@ class Game:
         }
     def start(self):
         while self._state["round"] < 6 and not self._state["over"]:
-            guess = self._input_service.get_word().strip().upper()
+            self._prompter.show_message(f"Round {(self._state['round'] + 1)}")
+            guess = self._input_service.get_word(invalid=self._state["guesses"]).strip().upper()
             self._state["guesses"].append(guess)
-            self._state["round"] += self._state["round"]
+            self._state["round"] = self._state["round"] + 1
             analysis = self._analyze_guess(guess)
             self._state["over"] = len([val for val in analysis.values() if val[0] == LetterResult.PERFECT]) == 5
-            self._prompter.show_colored_message(analysis)
+            self._prompter.show_colored_message([(val[0].value, val[1]) for val in analysis.values()])
             if self._state["over"]:
                 self._state["won"] = True
-                print("Winner!")
+                self._prompter.show_colored_message([("green", "W"), ("green", "I"), ("green", "N"), ("green", "N"), ("green", "E"), ("green", "R"),("green", "!")])
                 return self._state
-                #TODO congratulate winner
-        print("lost") #TODO ridicule loser
+        self._prompter.show_colored_message([("red", "L"), ("red", "O"), ("red", "S"), ("red", "E"), ("red", "R"), ("red", "!")])
         self._state["won"] = False
         return self._state
+       
+  
     def _analyze_guess(self, guess):
         analysis = {}
         right_word = self._wordle_day.word
-        #TODO this map doesn't work since it doesn't allow multiples of the same letter
+        adjusted_word = right_word
+        #find perfect matches
         for letter_index in range(5):
             guessed_letter = guess[letter_index]
-            if guessed_letter == right_word[letter_index]:
-                analysis[f"{letter_index}"] = (LetterResult.PERFECT, guessed_letter)
-            elif guessed_letter in right_word:
-                #TODO figure out how to turn the right number of letters yellow
-                #find count of each letter in right_word?
-                #
+            if guessed_letter == adjusted_word[letter_index]:
+                analysis[f"{letter_index}"] = (LetterResult.PERFECT, guessed_letter)   
+                adjusted_word = list(adjusted_word)
+                adjusted_word[letter_index] = '_'  
+                adjusted_word = ''.join(adjusted_word)        
+
+        #round 2, find wrong place matches        
+        for letter_index in range(5):
+            guessed_letter = guess[letter_index]
+            if f"{letter_index}" not in analysis and guessed_letter in adjusted_word:
                 analysis[f"{letter_index}"] = (LetterResult.WRONG_PLACE, guessed_letter)
-            else:
-                analysis[f"{letter_index}"] = (LetterResult.TOTALLY_WRONG, guessed_letter)    
-        print(analysis)
-        return analysis
+                adjusted_word.replace(guessed_letter, '_', 1)  
+
+        #round 3, set the remainder 
+        for letter_index in range(5):
+            guessed_letter = guess[letter_index]
+            if f"{letter_index}" not in analysis:
+                analysis[f"{letter_index}"] = (LetterResult.TOTALLY_WRONG, guessed_letter)
+
+        ordered_analysis = {}
+        for key in range(5):
+            ordered_analysis[f"{key}"] = analysis[f"{key}"]
+        return ordered_analysis

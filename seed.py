@@ -10,6 +10,5 @@ def seeder(session):
         d = date_list[i].date()
         word = words[i]
         wordle_day = WordleDay(word=word, date=d)
-        print(wordle_day)
         session.add(wordle_day)
     session.commit()
