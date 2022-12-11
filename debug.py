@@ -4,7 +4,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from game import Application
+from application import Application
 from models import Base
 from seed import seeder
 

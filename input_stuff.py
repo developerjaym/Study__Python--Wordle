@@ -9,13 +9,13 @@ class GuessValidator:
         return len(str) == 5
     def _is_word(self, str):
         return self._word_list.is_word(str)    
-    def validation_results(self, str, invalid):
+    def validation_results(self, str, already_guessed):
         results = {}
         if not self._is_long_enough(str):
             results["length"] = f"'{str}' is too short. Must be 5 characters."
         if not self._is_word(str):
-            results["valid"] = f"'{str}' is not in my dictionary."  
-        if len([word for word in invalid if word.upper() == str.upper()]) > 0:
+            results["nonword"] = f"'{str}' is not in my dictionary."  
+        if len([word for word in already_guessed if word.upper() == str.upper()]) > 0:
             results["played"] = f"'{str}' has already been played."      
         return results         
 
@@ -64,6 +64,7 @@ class Prompter:
         for val in color_letter_tuples:
             message = f"{message}{click.style(val[1], bg=val[0], fg=self._normal_bg, bold=True)}"
         click.secho(message)
+
 class InputService:
     def __init__(self, name_validator, password_validator, guess_validator, prompter):
         self._name_validator = name_validator
@@ -91,12 +92,12 @@ class InputService:
                 self._prompter.show_error(result)
             return self.get_password(confirmation_prompt)
         return response
-    def get_word(self, invalid):
+    def get_word(self, already_played):
         response = self._prompter.get_string("Your guess").upper().strip()
-        validation_results = self._guess_validator.validation_results(response, invalid)
+        validation_results = self._guess_validator.validation_results(response, already_played)
         if len(validation_results):
             for result in validation_results.values():
                 self._prompter.show_error(result)
-            return self.get_word(invalid)    
+            return self.get_word(already_played)    
         return response    
 
