@@ -11,6 +11,7 @@ class Game:
         self._wordle_day = wordle_day
         self._prompter = prompter
     def start(self):
+        # set state here so application can call start and then start totally fresh
         self._state = {
             "round": 0,
             "guesses": set(),
