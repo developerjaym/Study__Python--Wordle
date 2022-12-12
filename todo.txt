@@ -1,8 +1,9 @@
-3. Error handling
+1. Error handling
     -Test more
-8. I don't like my validation stuff
+2. I don't like my validation stuff
     -The input service methods should accept 'validator' arguments
-9. Add real days to the application
+3. Add real days to the application
     -Perhaps save them in a database  
-10. My word list is lacking
-    -jumpy? epoxy? So many common words are missing      
+4. My word list is lacking
+    -jumpy? epoxy? So many common words are missing  
+5. Save word list to the database        
