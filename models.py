@@ -63,8 +63,4 @@ class Result(Base):
         return f'Result(id={self.id}, ' + \
             f'score={self.score}, ' + \
             f'player_id={self.player_id}, ' + \
-            f'game_id={self.wordle_day_id})'            
-
-class Guess: #TODO save this eventually
-    def __init__(self) -> None:
-        pass            
+            f'game_id={self.wordle_day_id})'                      

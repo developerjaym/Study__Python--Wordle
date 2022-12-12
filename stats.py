@@ -1,5 +1,5 @@
-from models import Player, Result
-from datetime import datetime, timedelta, date
+from models import Result
+from datetime import datetime, timedelta
 
 class ResultRepository:
     def __init__(self, session):
