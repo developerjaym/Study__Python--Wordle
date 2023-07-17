@@ -12,7 +12,7 @@ class GuessValidator:
     def validation_results(self, str, already_guessed):
         results = {}
         if not self._is_long_enough(str):
-            results["length"] = f"'{str}' is too short. Must be 5 characters."
+            results["length"] = f"'{str}' is not the right length. Must be 5 characters."
         if not self._is_word(str):
             results["nonword"] = f"'{str}' is not in my dictionary."  
         if len([word for word in already_guessed if word.upper() == str.upper()]) > 0:

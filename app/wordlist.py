@@ -8,6 +8,6 @@ class WordList:
     def is_word(self, word):
         return word.lower() in self._word_list  
     def populate_word_list(self):
-        with open('app/words.txt', encoding='utf-8') as text_file:
+        with open('words.txt', encoding='utf-8') as text_file:
             self._word_list = set(text_file.read().split(","))
                   
